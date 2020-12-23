@@ -8,7 +8,8 @@ package main;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import util.FileUtility;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  *
@@ -17,11 +18,11 @@ import util.FileUtility;
 public class TCPClient {
 
     public static void main(String[] args) throws Exception {
-        Socket socket = new Socket("192.168.1.102", 6789);
+        Socket socket = new Socket("192.168.1.103", 6789);
         OutputStream outputStream = socket.getOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
         
-        byte[] bytes = FileUtility.readBytes("/Users/sarkhanrasullu/Desktop/me/Sarkhan Rasullu.jpg");
+        byte[] bytes = Files.readAllBytes(Paths.get("/Users/sarkhanrasullu/Desktop/Java.png"));
         dataOutputStream.writeInt(bytes.length);
         dataOutputStream.write(bytes);
         socket.close();

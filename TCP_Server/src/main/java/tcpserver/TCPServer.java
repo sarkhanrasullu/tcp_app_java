@@ -5,16 +5,14 @@
  */
 package tcpserver;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import lombok.SneakyThrows;
-import util.FileUtility;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  *
@@ -25,12 +23,11 @@ public class TCPServer {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         readAsByte();
     }
 
-    @SneakyThrows
-    public static void readAsByte() {
+    public static void readAsByte() throws Exception{
         ServerSocket ourFirstServerSocket = new ServerSocket(6789);//localhost, 127.0.0.1, ipconfig
 
         while (true) {
@@ -42,12 +39,12 @@ public class TCPServer {
               
             byte[] arr = readMessage(dataStream);
             System.out.println("message length2="+arr.length);//500
-            FileUtility.writeBytes(arr, "/Users/sarkhanrasullu/Desktop/sarkhan.jpg");
+
+            Files.write(Paths.get("sarkhan.jpg"), arr);
         }
     }
 
-    @SneakyThrows
-    public static byte[] readMessage(DataInputStream din) {
+    public static byte[] readMessage(DataInputStream din) throws Exception{
         int msgLen = din.readInt();//1
         System.out.println("message length1="+msgLen);//500
         byte[] msg = new byte[msgLen];
@@ -56,8 +53,7 @@ public class TCPServer {
         return msg;
     }
 
-    @SneakyThrows
-    public static void readAsString() {
+    public static void readAsString() throws Exception{
         ServerSocket ourFirstServerSocket = new ServerSocket(6789);//localhost, 127.0.0.1, ipconfig
 
         while (true) {
