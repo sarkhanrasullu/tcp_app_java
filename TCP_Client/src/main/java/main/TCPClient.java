@@ -1,35 +1,49 @@
 package main;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.net.InetSocketAddress;
-import java.util.Scanner;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class TCPClient {
 
     public static void main(String[] args) {
+        String serverAddress = "localhost";
+        int serverPort = 6789;
+        String imagePath = "test.png";
+
         try (SocketChannel socketChannel = SocketChannel.open()) {
             // Connect to the server
-            socketChannel.connect(new InetSocketAddress("127.0.0.1", 6789));
+            socketChannel.connect(new InetSocketAddress(serverAddress, serverPort));
+            System.out.println("Connected to the server.");
 
-            while(true) {
-                // Send a message to the server
-                String messageToSend = new Scanner(System.in).nextLine();
-                ByteBuffer writeBuffer = ByteBuffer.wrap(messageToSend.getBytes());
-                socketChannel.write(writeBuffer);
+            // Read the image file into a byte array
+            byte[] imageBytes = Files.readAllBytes(Paths.get(imagePath));
+            int imageSize = imageBytes.length;
 
-                // Prepare to read the server's response
-                ByteBuffer readBuffer = ByteBuffer.allocate(1024);
-                int bytesRead = socketChannel.read(readBuffer);
+            // Send the image size (4 bytes)
+            ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
+            sizeBuffer.putInt(imageSize);
+            sizeBuffer.flip();
+            socketChannel.write(sizeBuffer);
 
-                if (bytesRead > 0) {
-                    readBuffer.flip(); // Switch to read mode
-                    byte[] responseBytes = new byte[readBuffer.remaining()];
-                    readBuffer.get(responseBytes);
-                    System.out.println("Server response: " + new String(responseBytes));
-                }
+            // Send the image data
+            ByteBuffer imageBuffer = ByteBuffer.wrap(imageBytes);//13913123
+            while (imageBuffer.hasRemaining()) {
+                socketChannel.write(imageBuffer);
             }
-        } catch (Exception e) {
+            System.out.println("Image sent to the server.");
+
+            // Receive the server's response
+            ByteBuffer responseBuffer = ByteBuffer.allocate(1024);
+            socketChannel.read(responseBuffer);
+            responseBuffer.flip();
+            String response = new String(responseBuffer.array(), 0, responseBuffer.limit());
+            System.out.println("Server response: " + response);
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
